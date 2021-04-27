@@ -1,15 +1,15 @@
-local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local math = _tl_compat and _tl_compat.math or math; require("love")
-
+require "love"
+local gr = love.graphics
 local g, angle = love.graphics, 26 * math.pi / 180
 local wid, hei = g.getWidth(), g.getHeight()
 
-function rotate(x, y, a)
+function rotate(x: number, y: number, a: number): number, number
    local s, c = math.sin(a), math.cos(a)
    local a_, b_ = x * c - y * s, x * s + y * c
    return a_, b_
 end
 
-function branches(a, b, len, ang, dir)
+function branches(a: number, b: number, len: number, ang: number, dir: number)
    len = len * .76
 
    if len < 10 then return end
@@ -35,7 +35,7 @@ function createTree()
    branches(a, b, lineLen, 0, 0)
 end
 
-local canvas
+local canvas: gr.Canvas
 
 local function init()
    canvas = g.newCanvas(wid, hei)
@@ -45,7 +45,7 @@ local function init()
 end
 
 local function draw()
-   g.draw(canvas)
+   g.draw(canvas as gr.Drawable)
 end
 
 local function update()
