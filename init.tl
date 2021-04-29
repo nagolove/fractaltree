@@ -1,12 +1,16 @@
 require "love"
+require "imgui"
 local gr = love.graphics
-local g, angle = love.graphics, 26 * math.pi / 180
-local wid, hei = g.getWidth(), g.getHeight()
+local angle = 26 * math.pi / 180
+local wid, hei = gr.getWidth(), gr.getHeight()
+local a_: number = 0
+local b_: number = 0
+
 
 function rotate(x: number, y: number, a: number): number, number
    local s, c = math.sin(a), math.cos(a)
-   local a_, b_ = x * c - y * s, x * s + y * c
-   return a_, b_
+   local a_tmp, b_tmp = x * c - y * s, x * s + y * c
+   return a_tmp, b_tmp
 end
 
 function branches(a: number, b: number, len: number, ang: number, dir: number)
@@ -16,7 +20,7 @@ function branches(a: number, b: number, len: number, ang: number, dir: number)
        return 
    end
 
-   g.setColor(len * 16, 255 - 2 * len, 0)
+   gr.setColor(len * 16, 255 - 2 * len, 0)
 
    if dir > 0 then 
        ang = ang - angle
@@ -28,43 +32,43 @@ function branches(a: number, b: number, len: number, ang: number, dir: number)
 
    vx = a + vx; vy = b - vy
 
-   g.line(a, b, vx, vy)
+   gr.line(a, b, vx, vy)
 
    branches(vx, vy, len, ang, 1)
    branches(vx, vy, len, ang, 0)
 end
 
-local randGen: love.math.RandomGenerator = love.math.newRandomGenerator()
-local seedState: {{number, number}}
+--local randGen: love.math.RandomGenerator = love.math.newRandomGenerator()
+--local seedState: {{number, number}}
 
 function createTree()
    local lineLen = 127
    local a, b = wid / 2, hei - lineLen
-   g.setColor(160, 40, 0)
-   g.line(wid / 2, hei, a, b)
+   gr.setColor(160, 40, 0)
+   gr.line(wid / 2, hei, a, b)
 
-   --branches(a, b, lineLen, 0, 1)
+   branches(a, b, lineLen, a_, b_)
    --branches(a, b, lineLen, 0, 0)
    --branches(a, b, lineLen, 0, 1.5)
    --branches(a, b, lineLen, 0.3, 0)
 
-   for _ = 1, 10 do
-       branches(a, b, lineLen, randGen:random(), randGen:random())
-   end
+   --for _ = 1, 10 do
+       --branches(a, b, lineLen, randGen:random(), randGen:random())
+   --end
 
 end
 
 local canvas: gr.Canvas
 
 local function init()
-   canvas = g.newCanvas(wid, hei)
-   g.setCanvas(canvas)
+   canvas = gr.newCanvas(wid, hei)
+   gr.setCanvas(canvas)
    createTree()
-   g.setCanvas()
+   gr.setCanvas()
 end
 
 local function draw()
-   g.draw(canvas as gr.Drawable)
+   gr.draw(canvas as gr.Drawable)
 end
 
 local function update()
@@ -76,7 +80,7 @@ end
 local stateLen = 10
 
 local function regenSeedState()
-    for i = 1, stateLen do
+    for _ = 1, stateLen do
 
     end
 end
@@ -87,9 +91,32 @@ local function keypressed(key: string)
     end
 end
 
+local function defSlider(currentvalue: number, name: string): number
+    local res: number
+    local stat: boolean
+    res, stat = imgui.SliderFloat(
+        'param energy',
+        currentvalue,
+        0,
+        1
+    )
+    return res
+end
+
+local function drawui()
+    --imgui.Begin('info', false, "NoTitleBar|NoMove|NoResize|AlwaysAutoResize")
+    imgui.Begin('dd', false, "AlwaysAutoResize")
+    a_ = defSlider(a_, "a")
+    b_ = defSlider(b_, "b")
+    --imgui.Text(string.format('at point %d, %d', pos.x, pos.y))
+    print('drawui')
+    imgui.End()
+end
+
 return {
    init = init,
    draw = draw,
+   drawui = drawui,
    update = update,
    keypressed = keypressed,
 }
