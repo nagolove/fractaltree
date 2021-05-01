@@ -1,16 +1,22 @@
 require "love"
 require "imgui"
+local keyconfig = require "keyconfig"
 
-local gr = love.graphics
-local angle = 26 * math.pi / 180
-local wid, hei = gr.getWidth(), gr.getHeight()
 local lineLen = 127.
+local gr = love.graphics
+local wid, hei = gr.getWidth(), gr.getHeight()
+
 local a_2, b_2 = wid / 2, hei - lineLen
 local a_: number = 0
+local angle = 26 * math.pi / 180
 local b_: number = 0
+local binds = require "binds"
+local branchesIterations = 3
+local cam = require "camera".new()
 local magic = 0.76
 local minLen = 10.
-local branchesIterations = 3.
+local randomVariation = 0.
+local rg: love.math.RandomGenerator = love.math.newRandomGenerator()
 
 function rotate(x: number, y: number, a: number): number, number
    local s, c = math.sin(a), math.cos(a)
@@ -35,7 +41,8 @@ function branches(a: number, b: number, len: number, ang: number, dir: number)
 
    local vx, vy = rotate(0, len, ang)
 
-   vx = a + vx; vy = b - vy
+   vx = a + vx
+   vy = b - vy
 
    gr.line(a, b, vx, vy)
 
@@ -52,8 +59,13 @@ function createTree()
    gr.setColor(160, 40, 0)
    gr.line(wid / 2, hei, a, b)
 
-   for i = 1, branchesIterations do
-       branches(a, b, lineLen, a_, b_)
+   for _ = 1, branchesIterations do
+       --branches(a, b, lineLen, a_, b_)
+       if randomVariation ~= 0.0 then
+           branches(a, b, lineLen, a_ * rg:random(0, 1), b_ * rg:random(0, 1))
+       else
+           branches(a, b, lineLen, a_, b_)
+       end
    end
    --branches(a, b, lineLen, 0, 0)
    --branches(a, b, lineLen, 0, 1.5)
@@ -75,16 +87,45 @@ local function redrawTree()
 end
 
 local function init()
+    binds.bindCameraControl(cam)
+
+    local Shortcut = KeyConfig.Shortcut
+
+    KeyConfig.bind(
+        "isdown",
+        { key = "z" },
+        function(sc: Shortcut): boolean, Shortcut
+            cam:zoom(1.01)
+            return false, sc
+        end,
+        "zoom camera out",
+        "zoomout"
+    )
+
+    KeyConfig.bind(
+        "isdown",
+        { key = "x" },
+        function(sc: Shortcut): boolean, Shortcut
+            cam:zoom(0.99)
+            return false, sc
+        end,
+        "zoom camera in",
+        "zoomin"
+    )
+
     redrawTree()
 end
 local function draw()
-   gr.draw(canvas as gr.Drawable)
+    cam:attach()
+    gr.draw(canvas as gr.Drawable)
+    cam:detach()
 end
 
-local function update()
-   if love.keyboard.isDown("escape") then
-      love.event.quit()
-   end
+local function update(dt: number)
+    binds.cameraControlUpdate(dt)
+    if love.keyboard.isDown("escape") then
+        love.event.quit()
+    end
 end
 
 local stateLen = 10
@@ -138,7 +179,10 @@ local function drawui()
     lineLen = defSlider(lineLen, "lineLen", 0, maxLineLen)
     magic = defSlider(magic, "magic", 0, 5)
     minLen = defSlider(minLen, "min len", 1, 3)
-    branchesIterations = defSlider(branchesIterations, "branches iterations", 0, 10)
+    branchesIterations = math.ceil(defSlider(
+        branchesIterations, "branches iterations", 0, 10
+    ))
+    randomVariation = defSlider(randomVariation, "random variation", 0, 1)
 
     --imgui.Text(string.format('at point %d, %d', pos.x, pos.y))
     print('drawui')
