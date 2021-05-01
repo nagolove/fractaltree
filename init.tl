@@ -37,40 +37,49 @@ end
 
 local stack: {Line} = {}
 
-local function pushBranch(
-    x0: LineCoordinateType,
-    y0: LineCoordinateType,
-    x1: LineCoordinateType,
-    y1: LineCoordinateType
-)
-    table.insert(stack, {a = x0, b = y0, vx = x1, vy = y1})
-end
+--local function pushBranch(
+    --x0: LineCoordinateType,
+    --y0: LineCoordinateType,
+    --x1: LineCoordinateType,
+    --y1: LineCoordinateType
+--)
+    --table.insert(stack, {a = x0, b = y0, vx = x1, vy = y1})
+--end
 
+--[[ 
+Нужно развернуть рекурсивный вызов `branches` на цикл `for`.
+--]]
 function branches(a: number, b: number, len: number, ang: number, dir: number)
-   len = len * magic
+    local ok, errmsg: boolean, string = pcall(function()
+        len = len * magic
 
-   if len < minLen then 
-       return 
-   end
+        if len < minLen then 
+            return 
+        end
 
-   gr.setColor(len * 16, 255 - 2 * len, 0)
+        gr.setColor(len * 16, 255 - 2 * len, 0)
 
-   if dir > 0 then 
-       ang = ang - angle
-   else 
-       ang = ang + angle
-   end
+        if dir > 0 then 
+            ang = ang - angle
+        else 
+            ang = ang + angle
+        end
 
-   local vx, vy = rotate(0, len, ang)
+        local vx, vy = rotate(0, len, ang)
 
-   vx = a + vx
-   vy = b - vy
+        vx = a + vx
+        vy = b - vy
 
-   --gr.line(a, b, vx, vy)
-   pushBranch(a, b, vx, vy)
+        gr.line(a, b, vx, vy)
+        --pushBranch(a, b, vx, vy)
 
-   branches(vx, vy, len, ang, 1)
-   branches(vx, vy, len, ang, 0)
+        branches(vx, vy, len, ang, 1)
+        branches(vx, vy, len, ang, 0)
+    end)
+    if not ok then
+        collectgarbage("collect")
+        print(errmsg)
+    end
 end
 
 --local randGen: love.math.RandomGenerator = love.math.newRandomGenerator()
@@ -111,9 +120,9 @@ local canvas: gr.Canvas
 
 local function redrawTree()
     canvas = gr.newCanvas(wid, hei)
-    gr.setCanvas(canvas)
-    createTree()
-    gr.setCanvas()
+    --gr.setCanvas(canvas)
+    --createTree()
+    --gr.setCanvas()
 end
 
 local function init()
@@ -147,7 +156,8 @@ local function init()
 end
 local function draw()
     cam:attach()
-    gr.draw(canvas as gr.Drawable)
+    --gr.draw(canvas as gr.Drawable)
+    createTree()
     cam:detach()
 end
 
