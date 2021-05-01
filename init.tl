@@ -15,7 +15,9 @@ local cam = require "camera".new()
 local magic = 0.76
 local minLen = 10.
 local randomVariation = 0.
-local rg: love.math.RandomGenerator = love.math.newRandomGenerator()
+
+--local rg: love.math.RandomGenerator = love.math.newRandomGenerator()
+
 --local keyconfig = require "keyconfig"
 
 function rotate(x: number, y: number, a: number): number, number
@@ -24,14 +26,25 @@ function rotate(x: number, y: number, a: number): number, number
    return a_tmp, b_tmp
 end
 
+local type LineCoordinateType = number
+
 local record Line
-    a: number
-    b: number
-    vx: number
-    vy: number
+    a: LineCoordinateType
+    b: LineCoordinateType
+    vx: LineCoordinateType
+    vy: LineCoordinateType
 end
 
-local stack: Line = {}
+local stack: {Line} = {}
+
+local function pushBranch(
+    x0: LineCoordinateType,
+    y0: LineCoordinateType,
+    x1: LineCoordinateType,
+    y1: LineCoordinateType
+)
+    table.insert(stack, {a = x0, b = y0, vx = x1, vy = y1})
+end
 
 function branches(a: number, b: number, len: number, ang: number, dir: number)
    len = len * magic
@@ -53,7 +66,8 @@ function branches(a: number, b: number, len: number, ang: number, dir: number)
    vx = a + vx
    vy = b - vy
 
-   gr.line(a, b, vx, vy)
+   --gr.line(a, b, vx, vy)
+   pushBranch(a, b, vx, vy)
 
    branches(vx, vy, len, ang, 1)
    branches(vx, vy, len, ang, 0)
@@ -63,19 +77,22 @@ end
 --local seedState: {{number, number}}
 
 function createTree()
-   --local a, b = wid / 2, hei - lineLen
    local a, b = a_2, b_2
    gr.setColor(160, 40, 0)
    gr.line(wid / 2, hei, a, b)
 
-   for _ = 1, branchesIterations do
-       --branches(a, b, lineLen, a_, b_)
-       if randomVariation ~= 0.0 then
-           branches(a, b, lineLen, a_ * rg:random(0, 1), b_ * rg:random(0, 1))
-       else
-           branches(a, b, lineLen, a_, b_)
-       end
-   end
+   stack = {}
+   branches(a, b, lineLen, a_, b_)
+
+   --for _ = 1, branchesIterations do
+       ----branches(a, b, lineLen, a_, b_)
+       --if randomVariation ~= 0.0 then
+           --branches(a, b, lineLen, a_ * rg:random(0, 1), b_ * rg:random(0, 1))
+       --else
+           --branches(a, b, lineLen, a_, b_)
+       --end
+   --end
+
    --branches(a, b, lineLen, 0, 0)
    --branches(a, b, lineLen, 0, 1.5)
    --branches(a, b, lineLen, 0.3, 0)
@@ -83,6 +100,10 @@ function createTree()
    --for _ = 1, 10 do
        --branches(a, b, lineLen, randGen:random(), randGen:random())
    --end
+
+   for _, v in ipairs(stack) do
+       gr.line(v.a, v.b, v.vx, v.vy)
+   end
 
 end
 
