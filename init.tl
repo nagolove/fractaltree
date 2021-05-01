@@ -3,6 +3,8 @@ require "imgui"
 local gr = love.graphics
 local angle = 26 * math.pi / 180
 local wid, hei = gr.getWidth(), gr.getHeight()
+local lineLen = 127.
+local a_2, b_2 = wid / 2, hei - lineLen
 local a_: number = 0
 local b_: number = 0
 
@@ -42,8 +44,8 @@ end
 --local seedState: {{number, number}}
 
 function createTree()
-   local lineLen = 127
-   local a, b = wid / 2, hei - lineLen
+   --local a, b = wid / 2, hei - lineLen
+   local a, b = a_2, b_2
    gr.setColor(160, 40, 0)
    gr.line(wid / 2, hei, a, b)
 
@@ -60,13 +62,16 @@ end
 
 local canvas: gr.Canvas
 
-local function init()
-   canvas = gr.newCanvas(wid, hei)
-   gr.setCanvas(canvas)
-   createTree()
-   gr.setCanvas()
+local function redrawTree()
+    canvas = gr.newCanvas(wid, hei)
+    gr.setCanvas(canvas)
+    createTree()
+    gr.setCanvas()
 end
 
+local function init()
+    redrawTree()
+end
 local function draw()
    gr.draw(canvas as gr.Drawable)
 end
@@ -91,23 +96,40 @@ local function keypressed(key: string)
     end
 end
 
-local function defSlider(currentvalue: number, name: string): number
+local function defSlider(
+    currentvalue: number,
+    name: string,
+    min: number, 
+    max: number
+): number
     local res: number
     local stat: boolean
     res, stat = imgui.SliderFloat(
-        'param energy',
+        name,
         currentvalue,
-        0,
-        1
+        min,
+        max
     )
+    if not stat then
+        res = currentvalue
+    else
+        redrawTree()
+    end
     return res
 end
+
+local maxLineLen = 2000
+local max_a_2 = 2000
+local max_b_2 = 2000
 
 local function drawui()
     --imgui.Begin('info', false, "NoTitleBar|NoMove|NoResize|AlwaysAutoResize")
     imgui.Begin('dd', false, "AlwaysAutoResize")
-    a_ = defSlider(a_, "a")
-    b_ = defSlider(b_, "b")
+    a_ = defSlider(a_, "a", 0, 1)
+    b_ = defSlider(b_, "b", 0, 1)
+    a_2 = defSlider(a_2, "a_2", 0, max_a_2)
+    b_2 = defSlider(b_2, "b_2", 0, max_b_2)
+    lineLen = defSlider(lineLen, "lineLen", 0, maxLineLen)
     --imgui.Text(string.format('at point %d, %d', pos.x, pos.y))
     print('drawui')
     imgui.End()
