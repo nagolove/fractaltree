@@ -1,6 +1,5 @@
 require "love"
 require "imgui"
-local keyconfig = require "keyconfig"
 
 local lineLen = 127.
 local gr = love.graphics
@@ -17,12 +16,22 @@ local magic = 0.76
 local minLen = 10.
 local randomVariation = 0.
 local rg: love.math.RandomGenerator = love.math.newRandomGenerator()
+--local keyconfig = require "keyconfig"
 
 function rotate(x: number, y: number, a: number): number, number
    local s, c = math.sin(a), math.cos(a)
    local a_tmp, b_tmp = x * c - y * s, x * s + y * c
    return a_tmp, b_tmp
 end
+
+local record Line
+    a: number
+    b: number
+    vx: number
+    vy: number
+end
+
+local stack: Line = {}
 
 function branches(a: number, b: number, len: number, ang: number, dir: number)
    len = len * magic
@@ -177,7 +186,7 @@ local function drawui()
     a_2 = defSlider(a_2, "a_2", 0, max_a_2)
     b_2 = defSlider(b_2, "b_2", 0, max_b_2)
     lineLen = defSlider(lineLen, "lineLen", 0, maxLineLen)
-    magic = defSlider(magic, "magic", 0, 5)
+    magic = defSlider(magic, "magic", 0, 1.)
     minLen = defSlider(minLen, "min len", 1, 3)
     branchesIterations = math.ceil(defSlider(
         branchesIterations, "branches iterations", 0, 10
