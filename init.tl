@@ -1,5 +1,6 @@
 require "love"
 require "imgui"
+
 local gr = love.graphics
 local angle = 26 * math.pi / 180
 local wid, hei = gr.getWidth(), gr.getHeight()
@@ -7,7 +8,9 @@ local lineLen = 127.
 local a_2, b_2 = wid / 2, hei - lineLen
 local a_: number = 0
 local b_: number = 0
-
+local magic = 0.76
+local minLen = 10.
+local branchesIterations = 3.
 
 function rotate(x: number, y: number, a: number): number, number
    local s, c = math.sin(a), math.cos(a)
@@ -16,9 +19,9 @@ function rotate(x: number, y: number, a: number): number, number
 end
 
 function branches(a: number, b: number, len: number, ang: number, dir: number)
-   len = len * .76
+   len = len * magic
 
-   if len < 10 then 
+   if len < minLen then 
        return 
    end
 
@@ -49,7 +52,9 @@ function createTree()
    gr.setColor(160, 40, 0)
    gr.line(wid / 2, hei, a, b)
 
-   branches(a, b, lineLen, a_, b_)
+   for i = 1, branchesIterations do
+       branches(a, b, lineLen, a_, b_)
+   end
    --branches(a, b, lineLen, 0, 0)
    --branches(a, b, lineLen, 0, 1.5)
    --branches(a, b, lineLen, 0.3, 0)
@@ -125,11 +130,16 @@ local max_b_2 = 2000
 local function drawui()
     --imgui.Begin('info', false, "NoTitleBar|NoMove|NoResize|AlwaysAutoResize")
     imgui.Begin('dd', false, "AlwaysAutoResize")
+
     a_ = defSlider(a_, "a", 0, 1)
     b_ = defSlider(b_, "b", 0, 1)
     a_2 = defSlider(a_2, "a_2", 0, max_a_2)
     b_2 = defSlider(b_2, "b_2", 0, max_b_2)
     lineLen = defSlider(lineLen, "lineLen", 0, maxLineLen)
+    magic = defSlider(magic, "magic", 0, 5)
+    minLen = defSlider(minLen, "min len", 1, 3)
+    branchesIterations = defSlider(branchesIterations, "branches iterations", 0, 10)
+
     --imgui.Text(string.format('at point %d, %d', pos.x, pos.y))
     print('drawui')
     imgui.End()
