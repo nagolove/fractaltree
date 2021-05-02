@@ -16,7 +16,7 @@ local magic = 0.76
 local minLen = 10.
 local randomVariation = 0.
 
---local rg: love.math.RandomGenerator = love.math.newRandomGenerator()
+local rg: love.math.RandomGenerator = love.math.newRandomGenerator()
 
 --local keyconfig = require "keyconfig"
 
@@ -36,20 +36,28 @@ local record Line
 end
 
 local stack: {Line} = {}
+local vertices: {number} = {}
 
---local function pushBranch(
-    --x0: LineCoordinateType,
-    --y0: LineCoordinateType,
-    --x1: LineCoordinateType,
-    --y1: LineCoordinateType
---)
-    --table.insert(stack, {a = x0, b = y0, vx = x1, vy = y1})
---end
+local function pushBranch(
+    x0: LineCoordinateType,
+    y0: LineCoordinateType,
+    x1: LineCoordinateType,
+    y1: LineCoordinateType
+)
+    table.insert(stack, {a = x0, b = y0, vx = x1, vy = y1})
+end
 
 --[[ 
 Нужно развернуть рекурсивный вызов `branches` на цикл `for`.
 --]]
-function branches(a: number, b: number, len: number, ang: number, dir: number)
+function branches(
+    deep: integer, 
+    a: number, 
+    b: number, 
+    len: number, 
+    ang: number, 
+    dir: number
+)
     local ok, errmsg: boolean, string = pcall(function()
         len = len * magic
 
@@ -57,7 +65,8 @@ function branches(a: number, b: number, len: number, ang: number, dir: number)
             return 
         end
 
-        gr.setColor(len * 16, 255 - 2 * len, 0)
+        --gr.setColor(len * 16, 255 - 2 * len, 0)
+        gr.setColor(rg:random(), rg:random(), rg:random())
 
         if dir > 0 then 
             ang = ang - angle
@@ -70,11 +79,20 @@ function branches(a: number, b: number, len: number, ang: number, dir: number)
         vx = a + vx
         vy = b - vy
 
-        gr.line(a, b, vx, vy)
-        --pushBranch(a, b, vx, vy)
+        --[[
+        Здесь должно быть формирование полигонов из граней.
+        ]]--
 
-        branches(vx, vy, len, ang, 1)
-        branches(vx, vy, len, ang, 0)
+        gr.line(a, b, vx, vy)
+        pushBranch(a, b, vx, vy)
+
+        --table.insert(vertices, a)
+        --table.insert(vertices, b)
+        --table.insert(vertices, vx)
+        --table.insert(vertices, vy)
+
+        branches(deep, vx, vy, len, ang, 1)
+        branches(deep, vx, vy, len, ang, 0)
     end)
     if not ok then
         collectgarbage("collect")
@@ -85,13 +103,15 @@ end
 --local randGen: love.math.RandomGenerator = love.math.newRandomGenerator()
 --local seedState: {{number, number}}
 
+local DEEP = 1
+
 function createTree()
    local a, b = a_2, b_2
    gr.setColor(160, 40, 0)
    gr.line(wid / 2, hei, a, b)
 
    stack = {}
-   branches(a, b, lineLen, a_, b_)
+   branches(DEEP, a, b, lineLen, a_, b_)
 
    --for _ = 1, branchesIterations do
        ----branches(a, b, lineLen, a_, b_)
@@ -110,16 +130,18 @@ function createTree()
        --branches(a, b, lineLen, randGen:random(), randGen:random())
    --end
 
-   for _, v in ipairs(stack) do
-       gr.line(v.a, v.b, v.vx, v.vy)
-   end
+   --for _, v in ipairs(stack) do
+       --gr.line(v.a, v.b, v.vx, v.vy)
+   --end
+
+   --gr.polygon("fill", vertices)
 
 end
 
-local canvas: gr.Canvas
+--local canvas: gr.Canvas
 
 local function redrawTree()
-    canvas = gr.newCanvas(wid, hei)
+    --canvas = gr.newCanvas(wid, hei)
     --gr.setCanvas(canvas)
     --createTree()
     --gr.setCanvas()
@@ -154,6 +176,7 @@ local function init()
 
     redrawTree()
 end
+
 local function draw()
     cam:attach()
     --gr.draw(canvas as gr.Drawable)
@@ -225,7 +248,7 @@ local function drawui()
     randomVariation = defSlider(randomVariation, "random variation", 0, 1)
 
     --imgui.Text(string.format('at point %d, %d', pos.x, pos.y))
-    print('drawui')
+    --print('drawui')
     imgui.End()
 end
 
