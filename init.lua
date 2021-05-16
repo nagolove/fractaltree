@@ -83,13 +83,23 @@ function branches(
 
 
 
-      gr.line(a, b, vx, vy)
+
+
+
+      local x0, y0 = cam:cameraCoords(a, b)
+
+
+      local w, h = wid, hei
+      if pointInRect(a, b, x0, y0, w, h) and pointInRect(vx, vy, x0, y0, w, h) then
+         gr.line(a, b, vx, vy)
+      end
+
       pushBranch(a, b, vx, vy)
 
-      table.insert(vertices, a)
-      table.insert(vertices, b)
-      table.insert(vertices, vx)
-      table.insert(vertices, vy)
+
+
+
+
 
       branches(deep, vx, vy, len, ang, 1)
       branches(deep, vx, vy, len, ang, 0)
@@ -111,6 +121,10 @@ function createTree()
    gr.line(wid / 2, hei, a, b)
 
    stack = {}
+
+   print("start", DEEP, a, b, lineLen, a_, b_)
+
+
    branches(DEEP, a, b, lineLen, a_, b_)
 
 
@@ -122,9 +136,9 @@ function createTree()
 
 
 
-
-
-
+   branches(math.floor(a), math.floor(b), lineLen, 0, 0)
+   branches(math.floor(a), math.floor(b), lineLen, 0, 1.5)
+   branches(math.floor(a), math.floor(b), lineLen, 0.3, 0)
 
 
 

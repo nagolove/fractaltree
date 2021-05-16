@@ -83,7 +83,17 @@ function branches(
         Здесь должно быть формирование полигонов из граней.
         ]]--
 
-        gr.line(a, b, vx, vy)
+        -- отсечение линии за пределами экрана
+
+        --local x0, y0 = 0., 0.
+        local x0, y0 = cam:cameraCoords(a, b)
+        --local x1, y1 = cam:cameraCoords(vx, vy)
+        --local w, h = 0., 0.
+        local w, h = wid, hei
+        if pointInRect(a, b, x0, y0, w, h) and pointInRect(vx, vy, x0, y0, w, h) then
+            gr.line(a, b, vx, vy)
+        end
+
         pushBranch(a, b, vx, vy)
 
         --table.insert(vertices, a)
@@ -111,6 +121,10 @@ function createTree()
    gr.line(wid / 2, hei, a, b)
 
    stack = {}
+
+   print("start", DEEP, a, b, lineLen, a_, b_)
+   --error("program stop")
+
    branches(DEEP, a, b, lineLen, a_, b_)
 
    --for _ = 1, branchesIterations do
@@ -122,9 +136,9 @@ function createTree()
        --end
    --end
 
-   --branches(a, b, lineLen, 0, 0)
-   --branches(a, b, lineLen, 0, 1.5)
-   --branches(a, b, lineLen, 0.3, 0)
+   branches(math.floor(a), math.floor(b), lineLen, 0, 0)
+   branches(math.floor(a), math.floor(b), lineLen, 0, 1.5)
+   branches(math.floor(a), math.floor(b), lineLen, 0.3, 0)
 
    --for _ = 1, 10 do
        --branches(a, b, lineLen, randGen:random(), randGen:random())
