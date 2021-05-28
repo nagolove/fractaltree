@@ -155,10 +155,10 @@ end
 --local canvas: gr.Canvas
 
 local function redrawTree()
-    --canvas = gr.newCanvas(wid, hei)
-    --gr.setCanvas(canvas)
-    --createTree()
-    --gr.setCanvas()
+    local canvas = gr.newCanvas(wid, hei)
+    gr.setCanvas(canvas)
+    createTree()
+    gr.setCanvas()
 end
 
 local function init()
@@ -166,6 +166,9 @@ local function init()
 
     local Shortcut = KeyConfig.Shortcut
 
+    --[[
+    -- TODO список хоткеев
+    --]]
     KeyConfig.bind(
         "isdown",
         { key = "z" },
