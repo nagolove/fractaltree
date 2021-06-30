@@ -136,9 +136,9 @@ function createTree()
        --end
    --end
 
-   branches(math.floor(a), math.floor(b), lineLen, 0, 0)
-   branches(math.floor(a), math.floor(b), lineLen, 0, 1.5)
-   branches(math.floor(a), math.floor(b), lineLen, 0.3, 0)
+   --branches(math.floor(a), math.floor(b), lineLen, 0, 0)
+   --branches(math.floor(a), math.floor(b), lineLen, 0, 1.5)
+   --branches(math.floor(a), math.floor(b), lineLen, 0.3, 0)
 
    --for _ = 1, 10 do
        --branches(a, b, lineLen, randGen:random(), randGen:random())
@@ -152,10 +152,9 @@ function createTree()
 
 end
 
---local canvas: gr.Canvas
+local canvas: gr.Canvas = gr.newCanvas(wid, hei)
 
 local function redrawTree()
-    local canvas = gr.newCanvas(wid, hei)
     gr.setCanvas(canvas)
     createTree()
     gr.setCanvas()
@@ -196,8 +195,9 @@ end
 
 local function draw()
     cam:attach()
-    --gr.draw(canvas as gr.Drawable)
-    createTree()
+    gr.draw(canvas as gr.Drawable)
+    --createTree()
+
     cam:detach()
 end
 

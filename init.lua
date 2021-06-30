@@ -136,9 +136,9 @@ function createTree()
 
 
 
-   branches(math.floor(a), math.floor(b), lineLen, 0, 0)
-   branches(math.floor(a), math.floor(b), lineLen, 0, 1.5)
-   branches(math.floor(a), math.floor(b), lineLen, 0.3, 0)
+
+
+
 
 
 
@@ -152,19 +152,21 @@ function createTree()
 
 end
 
-
+local canvas = gr.newCanvas(wid, hei)
 
 local function redrawTree()
-
-
-
-
+   gr.setCanvas(canvas)
+   createTree()
+   gr.setCanvas()
 end
 
 local function init()
    binds.bindCameraControl(cam)
 
    local Shortcut = KeyConfig.Shortcut
+
+
+
 
    KeyConfig.bind(
    "isdown",
@@ -193,8 +195,9 @@ end
 
 local function draw()
    cam:attach()
+   gr.draw(canvas)
 
-   createTree()
+
    cam:detach()
 end
 
